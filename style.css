@@ -680,3 +680,87 @@ body.cursor-hover-project #cursor-dot{
   .scroll-hint i{ animation:none; }
   *{ scroll-behavior:auto !important; }
 }
+
+/* ============ CV ADDITIONS ============ */
+.hero-meta{
+  margin-top:1.4rem;
+  font-family:var(--font-mono);
+  font-size:.72rem;
+  letter-spacing:.12em;
+  color:var(--text-dim);
+  text-shadow:0 2px 12px rgba(0,0,0,0.9);
+}
+.project-links{ display:flex; flex-wrap:wrap; gap:1.2rem; }
+.about-award{
+  margin-top:1.4rem;
+  font-family:var(--font-mono);
+  font-size:.7rem;
+  letter-spacing:.08em;
+  color:var(--dna-silver);
+  padding:.6rem 1rem;
+  border:1px solid rgba(77,240,255,0.25);
+  border-radius:20px;
+  background:rgba(0,0,0,0.35);
+}
+.about-award span{ color:var(--cyan); margin-right:.3rem; }
+
+.experience-section{ flex-direction:column; gap:3rem; }
+.timeline{
+  list-style:none;
+  width:min(760px, 92vw);
+  border-left:1px solid rgba(77,240,255,0.25);
+  display:flex; flex-direction:column; gap:2.4rem;
+}
+.timeline-item{
+  position:relative;
+  padding:1.2rem 1.4rem;
+  margin-left:1.6rem;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:rgba(5,5,5,0.72);
+  backdrop-filter:blur(6px);
+}
+.timeline-item::before{
+  content:'';
+  position:absolute;
+  left:calc(-1.6rem - 5px); top:1.6rem;
+  width:9px; height:9px; border-radius:50%;
+  background:var(--cyan);
+  box-shadow:0 0 10px 2px rgba(77,240,255,0.6);
+}
+.tl-date{
+  display:block;
+  font-family:var(--font-mono);
+  font-size:.62rem;
+  letter-spacing:.2em;
+  color:var(--cyan);
+  margin-bottom:.4rem;
+}
+.tl-role{ font-size:1.25rem; font-weight:600; }
+.tl-role em{ font-style:normal; font-size:.8rem; color:var(--text-dim); font-weight:400; }
+.tl-org{ font-size:.85rem; color:var(--dna-silver); margin:.2rem 0 .8rem; }
+.tl-points{ list-style:none; display:flex; flex-direction:column; gap:.4rem; }
+.tl-points li{
+  position:relative; padding-left:1rem;
+  font-size:.88rem; line-height:1.6; color:var(--text-dim);
+}
+.tl-points li::before{ content:'—'; position:absolute; left:0; color:var(--text-dimmer); }
+.edu-grid{
+  width:min(760px, 92vw);
+  display:grid; grid-template-columns:1fr 1fr; gap:1rem;
+}
+.edu-card{
+  padding:1.1rem 1.3rem;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:rgba(5,5,5,0.72);
+}
+.edu-card h4{ font-size:1rem; font-weight:600; margin-bottom:.3rem; }
+.edu-card p{ font-size:.82rem; color:var(--text-dim); }
+.skill-node .node-label{ white-space:normal; text-align:right; }
+@media (max-width: 860px){
+  .edu-grid{ grid-template-columns:1fr; }
+  .timeline-item{ margin-left:1.1rem; }
+  .timeline-item::before{ left:calc(-1.1rem - 5px); }
+  .project-links{ justify-content:center; }
+}

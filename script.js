@@ -25,16 +25,18 @@ const CONFIG = {
   // along the helix, and an accent colour used to "glow" that section of DNA
   // while the visitor is inside its scroll range.
   projects: [
-    { key: 'browser',   name: 'MMS HRMS',   depth: 0.16, color: 0x6fa8ff },
-    { key: 'phone',     name: 'NaamJaap',    depth: 0.32, color: 0x4df0ff },
-    { key: 'split',     name: 'CHSeva',      depth: 0.48, color: 0xffffff },
-    { key: 'dashboard', name: 'MMS PMS',     depth: 0.64, color: 0x6fa8ff },
-    { key: 'featured',  name: 'offerX',      depth: 0.82, color: 0x4df0ff },
+    { key: 'browser',   name: 'Purpl IBS',     depth: 0.16, color: 0x6fa8ff },
+    { key: 'phone',     name: 'MyCityA2Z',     depth: 0.32, color: 0x4df0ff },
+    { key: 'split',     name: 'Service Book',  depth: 0.48, color: 0xffffff },
+    { key: 'dashboard', name: 'CCPL PM',       depth: 0.64, color: 0x6fa8ff },
+    { key: 'featured',  name: 'Drakey',        depth: 0.82, color: 0x4df0ff },
   ],
 
   skills: [
-    'HTML', 'CSS', 'JAVASCRIPT', 'REACT', 'JAVA',
-    'SPRING BOOT', 'KOTLIN', 'NODE.JS', 'PHP', 'CLOUD',
+    'JAVA 8 / 17', 'SPRING BOOT', 'SPRING SECURITY', 'MICROSERVICES',
+    'REST APIS', 'JWT / OAUTH2', 'HIBERNATE', 'POSTGRESQL', 'MYSQL',
+    'REDIS', 'RABBITMQ', 'AWS · EC2 S3 SQS SES', 'DOCKER', 'GIT / CI-CD',
+    'JUNIT / MOCKITO',
   ],
 };
 
