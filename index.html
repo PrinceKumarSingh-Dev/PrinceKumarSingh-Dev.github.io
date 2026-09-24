@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Prince Kumar Singh — Java Backend Engineer</title>
 <meta name="description" content="Prince Kumar Singh — Java &amp; Spring Boot backend engineer. REST APIs, JWT/OAuth2, PostgreSQL, AWS and Docker. Portfolio of production projects.">
+<meta name="theme-color" content="#050d1d">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="style.css">
 </head>
@@ -22,8 +23,8 @@
 <div id="loading-screen">
   <canvas id="loader-canvas"></canvas>
   <div class="loading-content">
-    <h1 class="loading-title">PRINCE</h1>
-    <p class="loading-subtitle">BACKEND DNA</p>
+    <span class="logo-box logo-box-lg">P</span>
+    <p class="loading-subtitle">Prince Kumar Singh</p>
     <div class="loading-bar-track">
       <div class="loading-bar-fill" id="loading-bar-fill"></div>
     </div>
@@ -33,22 +34,34 @@
 
 <!-- ============ WEBGL CANVAS (fixed, behind everything) ============ -->
 <canvas id="webgl" aria-hidden="true"></canvas>
-
-<!-- ============ VIGNETTE / GRAIN OVERLAY ============ -->
 <div id="scene-overlay" aria-hidden="true"></div>
 
 <!-- ============ FIXED UI CHROME ============ -->
 <header id="site-header">
-  <span class="brand">PRINCE</span>
-  <span class="brand-sub">JAVA · SPRING BOOT</span>
+  <a href="#hero" class="header-side header-left" data-scroll>
+    <span class="header-name">Prince K. Singh</span>
+  </a>
+  <a href="#hero" class="logo-box" data-scroll aria-label="Back to top">P</a>
+  <button type="button" class="header-side header-right menu-btn" id="menu-btn" aria-expanded="false" aria-controls="menu-overlay">menu</button>
 </header>
 
+<nav id="menu-overlay" aria-label="Main menu" aria-hidden="true">
+  <ol class="menu-list">
+    <li><a href="#project-0" data-scroll><span>01</span>Work</a></li>
+    <li><a href="#about" data-scroll><span>02</span>About</a></li>
+    <li><a href="#experience" data-scroll><span>03</span>Experience</a></li>
+    <li><a href="#skills" data-scroll><span>04</span>Skills</a></li>
+    <li><a href="#contact" data-scroll><span>05</span>Contact</a></li>
+  </ol>
+  <p class="menu-foot">957prince@gmail.com · Kolkata, India</p>
+</nav>
+
 <nav id="nav-indicator" aria-label="Project navigation">
-  <div class="nav-marker" data-index="0"><span class="nav-num">01</span><i></i></div>
-  <div class="nav-marker" data-index="1"><span class="nav-num">02</span><i></i></div>
-  <div class="nav-marker" data-index="2"><span class="nav-num">03</span><i></i></div>
-  <div class="nav-marker" data-index="3"><span class="nav-num">04</span><i></i></div>
-  <div class="nav-marker" data-index="4"><span class="nav-num">05</span><i></i></div>
+  <a href="#project-0" data-scroll class="nav-marker" data-index="0"><i></i><span class="nav-num">01</span></a>
+  <a href="#project-1" data-scroll class="nav-marker" data-index="1"><i></i><span class="nav-num">02</span></a>
+  <a href="#project-2" data-scroll class="nav-marker" data-index="2"><i></i><span class="nav-num">03</span></a>
+  <a href="#project-3" data-scroll class="nav-marker" data-index="3"><i></i><span class="nav-num">04</span></a>
+  <a href="#project-4" data-scroll class="nav-marker" data-index="4"><i></i><span class="nav-num">05</span></a>
 </nav>
 
 <div class="scroll-progress" aria-hidden="true">
@@ -61,150 +74,106 @@
   <!-- HERO -->
   <section class="section hero-section" id="hero">
     <div class="hero-content">
-      <h1 class="hero-name" data-split>PRINCE</h1>
-      <h2 class="hero-role">
-        <span data-split>JAVA BACKEND</span>
-        <span data-split>ENGINEER</span>
-      </h2>
-      <p class="hero-meta">Prince Kumar Singh · Java 17 · Spring Boot · AWS · ~3 yrs</p>
-      <p class="scroll-hint"><span>SCROLL TO EXPLORE</span><i></i></p>
+      <span class="kicker">Prince Kumar Singh · Java Backend Engineer</span>
+      <h1 class="hero-title">What does a strong backend look like from the inside?</h1>
+      <p class="hero-sub">Nearly 3 years building scalable services with Java 17, Spring Boot, REST APIs and AWS. Scroll to travel through my work.</p>
     </div>
+    <a href="#project-0" data-scroll class="circle-link hero-cta">
+      <span class="circle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
+      <span class="circle-label">Explore work</span>
+    </a>
+    <p class="scroll-hint"><i></i><span>scroll</span></p>
   </section>
 
-  <!-- PROJECT 01 — Browser window -->
-  <section class="section project-section" id="project-0" data-project-index="0" data-type="browser">
-    <div class="project-panel panel-browser" data-panel>
-      <div class="panel-frame browser-frame">
-        <div class="browser-chrome">
-          <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
-          <div class="browser-address">purpl · integrated business system</div>
-        </div>
-        <div class="browser-body">
-          <div class="fake-ui fake-ui-sidebar"></div>
-          <div class="fake-ui fake-ui-chart"></div>
-          <div class="fake-ui fake-ui-row"></div>
-          <div class="fake-ui fake-ui-row short"></div>
-        </div>
-      </div>
+  <!-- PROJECT 01 -->
+  <section class="section project-section" id="project-0" data-project-index="0">
+    <div class="project-panel" data-panel>
       <div class="project-copy">
-        <span class="project-index">01</span>
-        <h3 class="project-name">Purpl&nbsp;IBS</h3>
-        <p class="project-desc">Backend services for an enterprise platform that joins procurement, finance, inventory and taxation. Modular REST APIs let each business module talk to the others, and tuned queries keep high-volume transactions fast.</p>
+        <span class="project-index">01 — Purpl Integrated Business System</span>
+        <h3 class="project-title">What if procurement, finance, inventory and tax worked as one system?</h3>
+        <p class="project-desc">Backend services for an enterprise platform that joins every business module. Modular REST APIs let the modules talk to each other, and tuned queries keep high-volume transactions fast.</p>
         <div class="project-tags"><span>Java 17</span><span>Spring Boot</span><span>REST APIs</span><span>PostgreSQL</span></div>
       </div>
     </div>
   </section>
 
-  <!-- PROJECT 02 — Phone -->
-  <section class="section project-section" id="project-1" data-project-index="1" data-type="phone">
-    <div class="project-panel panel-phone" data-panel>
-      <div class="panel-frame phone-frame">
-        <div class="phone-notch"></div>
-        <div class="phone-screen">
-          <div class="fake-ui fake-ui-status"></div>
-          <div class="fake-ui fake-ui-hero"></div>
-          <div class="fake-ui fake-ui-row"></div>
-          <div class="fake-ui fake-ui-row"></div>
-          <div class="fake-ui fake-ui-row short"></div>
-        </div>
-      </div>
+  <!-- PROJECT 02 -->
+  <section class="section project-section" id="project-1" data-project-index="1">
+    <div class="project-panel" data-panel>
       <div class="project-copy">
-        <span class="project-index">02</span>
-        <h3 class="project-name">MyCityA2Z</h3>
-        <p class="project-desc">Backend APIs for a multi-service city platform — grocery marketplace, seller management and delivery partners. Handles orders, vendor operations and logistics across three live Android apps.</p>
+        <span class="project-index">02 — MyCityA2Z Platform</span>
+        <h3 class="project-title">How do you run a whole city's orders from three apps?</h3>
+        <p class="project-desc">Backend APIs for a multi-service city platform — grocery marketplace, seller management and delivery partners. Orders, vendor operations and logistics, live on the Play Store.</p>
         <div class="project-tags"><span>Spring Boot</span><span>REST APIs</span><span>MySQL</span><span>Logistics</span></div>
         <div class="project-links">
-          <a href="https://play.google.com/store/apps/details?id=com.mycitya2z.wholesale" target="_blank" rel="noopener" class="project-link">WHOLESALE <i>→</i></a>
-          <a href="https://play.google.com/store/apps/details?id=com.mycitya2z.seller" target="_blank" rel="noopener" class="project-link">SELLER <i>→</i></a>
-          <a href="https://play.google.com/store/apps/details?id=com.mycitya2z.deliverypartner" target="_blank" rel="noopener" class="project-link">DELIVERY <i>→</i></a>
+          <a href="https://play.google.com/store/apps/details?id=com.mycitya2z.wholesale" target="_blank" rel="noopener" class="text-link">Wholesale app ↗</a>
+          <a href="https://play.google.com/store/apps/details?id=com.mycitya2z.seller" target="_blank" rel="noopener" class="text-link">Seller app ↗</a>
+          <a href="https://play.google.com/store/apps/details?id=com.mycitya2z.deliverypartner" target="_blank" rel="noopener" class="text-link">Delivery app ↗</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- PROJECT 03 — Split strands -->
-  <section class="section project-section" id="project-2" data-project-index="2" data-type="split">
-    <div class="project-panel panel-split" data-panel>
-      <div class="panel-frame split-frame">
-        <div class="split-strand strand-left"></div>
-        <div class="split-content">
-          <div class="fake-ui fake-ui-chart"></div>
-          <div class="fake-ui fake-ui-row"></div>
-        </div>
-        <div class="split-strand strand-right"></div>
-      </div>
+  <!-- PROJECT 03 -->
+  <section class="section project-section" id="project-2" data-project-index="2">
+    <div class="project-panel" data-panel>
       <div class="project-copy">
-        <span class="project-index">03</span>
-        <h3 class="project-name">Service&nbsp;Book</h3>
-        <p class="project-desc">A digital service-record system for employees — promotions, department transfers and the full employee lifecycle, backed by clean database schemas and APIs.</p>
+        <span class="project-index">03 — Service Book Management System</span>
+        <h3 class="project-title">What does a whole career look like as clean data?</h3>
+        <p class="project-desc">Digital service records for employees — promotions, department transfers and the full employee lifecycle, backed by well-designed schemas and APIs.</p>
         <div class="project-tags"><span>Java</span><span>Spring Boot</span><span>Schema Design</span><span>REST APIs</span></div>
       </div>
     </div>
   </section>
 
-  <!-- PROJECT 04 — Dashboard -->
-  <section class="section project-section" id="project-3" data-project-index="3" data-type="dashboard">
-    <div class="project-panel panel-dashboard" data-panel>
-      <div class="panel-frame dashboard-frame">
-        <div class="dashboard-titlebar">CCPL · Project Overview</div>
-        <div class="dashboard-grid">
-          <div class="fake-ui fake-ui-card"></div>
-          <div class="fake-ui fake-ui-card"></div>
-          <div class="fake-ui fake-ui-card wide"></div>
-          <div class="fake-ui fake-ui-card"></div>
-        </div>
-      </div>
+  <!-- PROJECT 04 -->
+  <section class="section project-section" id="project-3" data-project-index="3">
+    <div class="project-panel" data-panel>
       <div class="project-copy">
-        <span class="project-index">04</span>
-        <h3 class="project-name">CCPL&nbsp;PM</h3>
+        <span class="project-index">04 — CCPL Project Management</span>
+        <h3 class="project-title">How do teams track leave, time and tasks in one place?</h3>
         <p class="project-desc">A project management platform in production — APIs for leave management, timesheets, tasks and project planning, on a modular backend built to scale.</p>
         <div class="project-tags"><span>Spring Boot</span><span>JWT</span><span>RBAC</span><span>PostgreSQL</span></div>
-        <a href="https://ccpl-app.conacent.com/#/login" target="_blank" rel="noopener" class="project-link">VIEW LIVE APP <i>→</i></a>
+        <a href="https://ccpl-app.conacent.com/#/login" target="_blank" rel="noopener" class="circle-link">
+          <span class="circle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="circle-label">View live app</span>
+        </a>
       </div>
     </div>
   </section>
 
-  <!-- PROJECT 05 — Featured climax -->
-  <section class="section featured-section" id="project-4" data-project-index="4" data-type="featured">
-    <div class="project-panel panel-featured" data-panel>
-      <span class="project-index">05 · FEATURED</span>
-      <h3 class="project-name">Drakey</h3>
-      <p class="project-desc featured-desc">A video streaming &amp; reward platform on event-driven microservices — S3 storage with FFmpeg transcoding, SQS background jobs, OAuth2 (Google / Apple) + JWT sign-in, Redis sessions and SES notifications.</p>
-      <div class="panel-frame featured-frame">
-        <div class="phone-notch"></div>
-        <div class="phone-screen featured-screen">
-          <div class="fake-ui fake-ui-status"></div>
-          <div class="fake-ui fake-ui-hero"></div>
-          <div class="fake-ui fake-ui-row"></div>
-          <div class="fake-ui fake-ui-row"></div>
-          <div class="fake-ui fake-ui-row short"></div>
-        </div>
+  <!-- PROJECT 05 — featured -->
+  <section class="section project-section featured-section" id="project-4" data-project-index="4">
+    <div class="project-panel" data-panel>
+      <div class="project-copy">
+        <span class="project-index">05 — Drakey · Featured</span>
+        <h3 class="project-title">What happens after you press upload?</h3>
+        <p class="project-desc">A video streaming &amp; reward platform on event-driven microservices. Videos land in AWS S3 and are transcoded with FFmpeg, heavy jobs run through AWS SQS, sign-in uses OAuth2 (Google / Apple) with JWT, Redis keeps sessions safe and AWS SES sends notifications.</p>
+        <div class="project-tags"><span>Microservices</span><span>AWS S3 · SQS · SES</span><span>FFmpeg</span><span>OAuth2 + JWT</span><span>Redis</span></div>
       </div>
-      <div class="project-tags"><span>Microservices</span><span>AWS S3 · SQS · SES</span><span>FFmpeg</span><span>OAuth2 + JWT</span><span>Redis</span></div>
     </div>
   </section>
 
   <!-- ABOUT -->
   <section class="section about-section" id="about">
-    <div class="about-strands" aria-hidden="true">
-      <span class="about-line line-left"></span>
-      <span class="about-line line-right"></span>
-    </div>
-    <div class="about-content">
-      <span class="about-kicker">ABOUT</span>
-      <h2 class="about-name">PRINCE KUMAR SINGH</h2>
-      <p class="about-tagline">SCALABLE BACKENDS<br>SECURE APIS<br>CLOUD-READY SERVICES</p>
-      <p class="about-bio">Software engineer with nearly 3 years of experience building backend systems in Java 17 and Spring Boot. I design REST APIs, secure them with JWT and OAuth2, and ship them on AWS with Docker. Before software, I spent years in MIS and system administration — so I care about systems that stay up. Based in Kolkata.</p>
-      <p class="about-award"><span>★</span> Gold Medalist, M.Sc. IT — awarded by the Governor of Jharkhand, 2023</p>
+    <div class="glass about-card">
+      <span class="kicker">About</span>
+      <h2 class="section-title">Where does a backend engineer come from?</h2>
+      <p class="about-bio">I'm Prince Kumar Singh, a software engineer with nearly 3 years of experience building backend systems in Java 17 and Spring Boot. I design REST APIs, secure them with JWT and OAuth2, and ship them on AWS with Docker.</p>
+      <p class="about-bio">Before software, I spent four years in MIS and system administration — so I care about systems that stay up. Today I work at Conacent Consulting in Kolkata.</p>
+      <p class="about-award"><span class="award-dot"></span>Gold Medalist, M.Sc. IT — awarded by the Governor of Jharkhand, 2023</p>
     </div>
   </section>
 
   <!-- EXPERIENCE -->
   <section class="section experience-section" id="experience">
-    <span class="section-kicker">EXPERIENCE</span>
+    <div class="section-head">
+      <span class="kicker">Experience</span>
+      <h2 class="section-title">The strand so far.</h2>
+    </div>
     <ol class="timeline">
-      <li class="timeline-item">
-        <span class="tl-date">JAN 2024 — PRESENT</span>
+      <li class="timeline-item glass">
+        <span class="tl-date">Jan 2024 — Present</span>
         <h3 class="tl-role">Java Developer</h3>
         <p class="tl-org">Conacent Consulting Pvt. Ltd. · Kolkata</p>
         <ul class="tl-points">
@@ -214,9 +183,9 @@
           <li>Tune PostgreSQL &amp; MySQL queries; ship through Git and CI/CD in Agile teams.</li>
         </ul>
       </li>
-      <li class="timeline-item">
-        <span class="tl-date">APR 2023 — JAN 2024</span>
-        <h3 class="tl-role">Jr. Java Developer <em>(from Intern)</em></h3>
+      <li class="timeline-item glass">
+        <span class="tl-date">Apr 2023 — Jan 2024</span>
+        <h3 class="tl-role">Jr. Java Developer <em>(joined as intern)</em></h3>
         <p class="tl-org">Daynil Group Solutions Pvt. Ltd. · Deoghar</p>
         <ul class="tl-points">
           <li>Built backend services and REST APIs for enterprise apps with Spring Boot.</li>
@@ -224,8 +193,8 @@
           <li>Secured API communication with JWT.</li>
         </ul>
       </li>
-      <li class="timeline-item">
-        <span class="tl-date">AUG 2019 — MAR 2023</span>
+      <li class="timeline-item glass">
+        <span class="tl-date">Aug 2019 — Mar 2023</span>
         <h3 class="tl-role">MIS Executive &amp; System Administrator</h3>
         <p class="tl-org">RKTCL-BLAPPL (JV) · VFRES · Mehta Feeds India — Jharkhand</p>
         <ul class="tl-points">
@@ -234,12 +203,12 @@
       </li>
     </ol>
     <div class="edu-grid">
-      <div class="edu-card">
+      <div class="edu-card glass">
         <span class="tl-date">2017 — 2019</span>
         <h4>M.Sc. Information Technology</h4>
         <p>AISECT University · 81.20% · Gold Medal</p>
       </div>
-      <div class="edu-card">
+      <div class="edu-card glass">
         <span class="tl-date">2014 — 2017</span>
         <h4>B.Sc. Computer Applications</h4>
         <p>Vinoba Bhave University · 77.16%</p>
@@ -249,9 +218,12 @@
 
   <!-- SKILLS -->
   <section class="section skills-section" id="skills">
-    <span class="section-kicker">ENCODED SKILLS</span>
-    <div class="skills-helix" id="skills-helix" role="list">
-      <!-- nodes injected by script.js -->
+    <div class="section-head">
+      <span class="kicker">Skills</span>
+      <h2 class="section-title">What's encoded in my DNA?</h2>
+    </div>
+    <div class="skills-grid" id="skills-grid" role="list">
+      <!-- chips injected by script.js -->
     </div>
   </section>
 
@@ -259,12 +231,15 @@
   <section class="section contact-section" id="contact">
     <div class="contact-particle" id="contact-particle" aria-hidden="true"></div>
     <div class="contact-content">
-      <span class="contact-kicker">PRINCE KUMAR SINGH</span>
-      <h2 class="contact-cta">LET'S<br>BUILD.</h2>
+      <span class="kicker">Contact</span>
+      <h2 class="contact-cta">Shall we build something together?</h2>
+      <a href="mailto:957prince@gmail.com" class="circle-link contact-main">
+        <span class="circle"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4z M4 6l8 7 8-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+        <span class="circle-label">957prince@gmail.com</span>
+      </a>
       <div class="contact-links">
-        <a href="mailto:957prince@gmail.com" class="contact-link"><span>EMAIL</span><i>957prince@gmail.com</i></a>
-        <a href="https://github.com/PrinceKumarSingh-Dev" target="_blank" rel="noopener" class="contact-link"><span>GITHUB</span><i>PrinceKumarSingh-Dev →</i></a>
-        <a href="https://www.linkedin.com/in/prince-kumar-singh-0956ab325/" target="_blank" rel="noopener" class="contact-link"><span>LINKEDIN</span><i>connect →</i></a>
+        <a href="https://github.com/PrinceKumarSingh-Dev" target="_blank" rel="noopener" class="text-link">GitHub ↗</a>
+        <a href="https://www.linkedin.com/in/prince-kumar-singh-0956ab325/" target="_blank" rel="noopener" class="text-link">LinkedIn ↗</a>
       </div>
       <p class="contact-foot">Java Backend Engineer · Kolkata, West Bengal · © 2026</p>
     </div>

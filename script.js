@@ -1,13 +1,15 @@
 /* ==========================================================================
-   PRINCE — DIGITAL DNA
-   Three.js DNA helix + GSAP ScrollTrigger scroll experience.
-   No build step: loaded as a native ES module via <script type="module">.
+   PRINCE KUMAR SINGH — DNA PORTFOLIO
+   Three.js cinematic DNA helix + GSAP ScrollTrigger.
+   The helix lies diagonally across a deep-navy scene; the camera glides
+   along it as you scroll, with amber glowing rings and cyan data light.
+   No build step: loaded as a native ES module.
    ========================================================================== */
 
 import * as THREE from 'three';
 
 /* --------------------------------------------------------------------------
-   0. CONFIG — all editable project / skill data lives here.
+   0. CONFIG — editable data lives here
    -------------------------------------------------------------------------- */
 const CONFIG = {
   reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -15,97 +17,85 @@ const CONFIG = {
   isMobile: window.innerWidth < 860,
 
   helix: {
-    turns: 34,
-    radius: 6.4,
-    totalHeight: 260,     // total vertical span the helix occupies
-    strandTubeRadius: 0.32,
+    turns: 22,
+    radius: 6,
+    totalHeight: 260,
+    tube: 0.38,
+    tilt: 1.12,          // radians — lays the helix diagonally across the screen
   },
 
-  // Each project maps to a normalised depth (0 = top/hero, 1 = bottom/contact)
-  // along the helix, and an accent colour used to "glow" that section of DNA
-  // while the visitor is inside its scroll range.
+  // Glow colour used on the rings while a project is on screen.
   projects: [
-    { key: 'browser',   name: 'Purpl IBS',     depth: 0.16, color: 0x6fa8ff },
-    { key: 'phone',     name: 'MyCityA2Z',     depth: 0.32, color: 0x4df0ff },
-    { key: 'split',     name: 'Service Book',  depth: 0.48, color: 0xffffff },
-    { key: 'dashboard', name: 'CCPL PM',       depth: 0.64, color: 0x6fa8ff },
-    { key: 'featured',  name: 'Drakey',        depth: 0.82, color: 0x4df0ff },
+    { name: 'Purpl IBS',    glow: [2.4, 1.35, 0.35] },
+    { name: 'MyCityA2Z',    glow: [0.35, 1.9, 2.6] },
+    { name: 'Service Book', glow: [2.4, 1.35, 0.35] },
+    { name: 'CCPL PM',      glow: [0.35, 1.9, 2.6] },
+    { name: 'Drakey',       glow: [2.8, 1.6, 0.45] },
   ],
 
   skills: [
-    'JAVA 8 / 17', 'SPRING BOOT', 'SPRING SECURITY', 'MICROSERVICES',
-    'REST APIS', 'JWT / OAUTH2', 'HIBERNATE', 'POSTGRESQL', 'MYSQL',
-    'REDIS', 'RABBITMQ', 'AWS · EC2 S3 SQS SES', 'DOCKER', 'GIT / CI-CD',
-    'JUNIT / MOCKITO',
+    'Java 8 / 17', 'Spring Boot', 'Spring Security', 'Microservices',
+    'REST APIs', 'JWT / OAuth2', 'Hibernate', 'PostgreSQL', 'MySQL',
+    'Redis', 'RabbitMQ', 'AWS (EC2, S3, SQS, SES)', 'Docker', 'Git & CI/CD',
+    'JUnit / Mockito', 'Maven', 'Postman', 'Agile / SDLC',
   ],
 };
 
 /* --------------------------------------------------------------------------
-   1. LOADING SCREEN — particle-forming intro + progress ramp
+   1. LOADING SCREEN
    -------------------------------------------------------------------------- */
-const loadingScreen   = document.getElementById('loading-screen');
-const loaderCanvas    = document.getElementById('loader-canvas');
-const loadingBarFill  = document.getElementById('loading-bar-fill');
-const loadingPercent  = document.getElementById('loading-percent');
-
+const loadingScreen  = document.getElementById('loading-screen');
+const loaderCanvas   = document.getElementById('loader-canvas');
+const loadingBarFill = document.getElementById('loading-bar-fill');
+const loadingPercent = document.getElementById('loading-percent');
 const loaderCtx = loaderCanvas.getContext('2d');
-let loaderW = 0, loaderH = 0, loaderDPR = Math.min(window.devicePixelRatio || 1, 2);
+const loaderDPR = Math.min(window.devicePixelRatio || 1, 2);
+let loaderW = 0, loaderH = 0;
 
-function sizeLoaderCanvas(){
+function sizeLoaderCanvas() {
   loaderW = window.innerWidth;
   loaderH = window.innerHeight;
-  loaderCanvas.width  = loaderW * loaderDPR;
+  loaderCanvas.width = loaderW * loaderDPR;
   loaderCanvas.height = loaderH * loaderDPR;
-  loaderCanvas.style.width  = loaderW + 'px';
-  loaderCanvas.style.height = loaderH + 'px';
   loaderCtx.setTransform(loaderDPR, 0, 0, loaderDPR, 0, 0);
 }
 sizeLoaderCanvas();
 
-// A small cloud of particles that drift and loosely gather into a vertical
-// column — evoking a DNA strand assembling itself out of noise.
-const LOADER_COUNT = CONFIG.isMobile ? 60 : 120;
-const loaderParticles = Array.from({ length: LOADER_COUNT }, () => {
-  const angle = Math.random() * Math.PI * 2;
-  const spread = 40 + Math.random() * 160;
+// Particles drift in and settle into a small diagonal double helix.
+const LOADER_COUNT = CONFIG.isMobile ? 70 : 130;
+const loaderParticles = Array.from({ length: LOADER_COUNT }, (_, i) => {
+  const a = Math.random() * Math.PI * 2;
+  const k = i / LOADER_COUNT;
   return {
-    x: loaderW / 2 + Math.cos(angle) * spread,
-    y: loaderH / 2 + Math.sin(angle) * spread,
-    tx: loaderW / 2 + (Math.random() - 0.5) * 26,
-    ty: loaderH / 2 + (Math.random() - 0.5) * 260,
-    r: Math.random() * 1.6 + 0.4,
-    speed: 0.01 + Math.random() * 0.02,
+    x: loaderW / 2 + Math.cos(a) * (120 + Math.random() * 300),
+    y: loaderH / 2 + Math.sin(a) * (120 + Math.random() * 300),
+    k,
+    side: i % 2,
+    r: Math.random() * 1.6 + 0.6,
+    speed: 0.02 + Math.random() * 0.03,
+    amber: Math.random() < 0.25,
   };
 });
 
 let loaderRunning = true;
-function drawLoader(){
+let loaderTime = 0;
+function drawLoader() {
   if (!loaderRunning) return;
+  loaderTime += 0.016;
   loaderCtx.clearRect(0, 0, loaderW, loaderH);
-  loaderCtx.fillStyle = 'rgba(5,5,5,1)';
-  loaderCtx.fillRect(0, 0, loaderW, loaderH);
-
-  loaderCtx.save();
+  const span = Math.min(loaderW, 700);
   loaderParticles.forEach((p) => {
-    p.x += (p.tx - p.x) * p.speed;
-    p.y += (p.ty - p.y) * p.speed;
+    const along = (p.k - 0.5) * span;
+    const wave = Math.sin(p.k * Math.PI * 6 + loaderTime * 1.4 + (p.side ? Math.PI : 0)) * 34;
+    const tx = loaderW / 2 + along * 0.9 + wave * 0.45;
+    const ty = loaderH / 2 + along * 0.45 - wave * 0.9;
+    p.x += (tx - p.x) * p.speed;
+    p.y += (ty - p.y) * p.speed;
     loaderCtx.beginPath();
     loaderCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    loaderCtx.fillStyle = 'rgba(180, 210, 255, 0.55)';
+    loaderCtx.fillStyle = p.amber ? 'rgba(255,171,61,0.85)' : 'rgba(120,190,255,0.55)';
     loaderCtx.fill();
   });
-  // faint connective lines between nearby particles, like forming base pairs
-  loaderCtx.strokeStyle = 'rgba(120,170,255,0.12)';
-  loaderCtx.lineWidth = 1;
-  for (let i = 0; i < loaderParticles.length; i += 2) {
-    const a = loaderParticles[i], b = loaderParticles[i + 1];
-    if (!b) continue;
-    loaderCtx.beginPath();
-    loaderCtx.moveTo(a.x, a.y);
-    loaderCtx.lineTo(b.x, b.y);
-    loaderCtx.stroke();
-  }
-  loaderCtx.restore();
   requestAnimationFrame(drawLoader);
 }
 drawLoader();
@@ -113,9 +103,7 @@ drawLoader();
 const loaderProgress = { value: 0 };
 function setLoaderProgress(target, duration = 0.6) {
   gsap.to(loaderProgress, {
-    value: target,
-    duration,
-    ease: 'power2.out',
+    value: target, duration, ease: 'power2.out',
     onUpdate: () => {
       loadingBarFill.style.width = loaderProgress.value + '%';
       loadingPercent.textContent = Math.round(loaderProgress.value) + '%';
@@ -126,151 +114,233 @@ function setLoaderProgress(target, duration = 0.6) {
 function hideLoader() {
   loaderRunning = false;
   loadingScreen.classList.add('hidden');
-  document.body.style.overflow = '';
   window.scrollTo(0, 0);
   playIntro();
 }
 
 /* --------------------------------------------------------------------------
-   2. THREE.JS SCENE SETUP
+   2. THREE.JS SCENE
    -------------------------------------------------------------------------- */
-document.body.style.overflow = 'hidden'; // lock scroll until intro is ready
+document.body.style.overflow = 'hidden'; // lock scroll until the intro is done
 
 const canvas = document.getElementById('webgl');
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x050505, 0.0105);
+scene.fog = new THREE.FogExp2(0x071631, 0.02);
 
-const camera = new THREE.PerspectiveCamera(
-  55, window.innerWidth / window.innerHeight, 0.1, 700
-);
+// Deep-navy gradient background (drawn by the renderer, so bloom sees it too).
+function makeBackground() {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 512;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(330, 190, 10, 280, 260, 420);
+  g.addColorStop(0, '#12366a');
+  g.addColorStop(0.45, '#0a1f42');
+  g.addColorStop(1, '#030a18');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, 512, 512);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+scene.background = makeBackground();
+
+const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 400);
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CONFIG.isMobile ? 1.5 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
 
-/* ---- Lighting --------------------------------------------------------- */
-scene.add(new THREE.AmbientLight(0x8fa8c0, 0.55));
+/* ---- Lighting ---- */
+scene.add(new THREE.HemisphereLight(0x6f9cff, 0x050a18, 0.9));
 
-const keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
-keyLight.position.set(12, 20, 18);
+const keyLight = new THREE.DirectionalLight(0xbfd6ff, 1.6);
+keyLight.position.set(10, 22, 16);
 scene.add(keyLight);
 
-const rimBlue = new THREE.PointLight(0x6fa8ff, 6, 90, 2);
-rimBlue.position.set(-16, 10, -10);
-scene.add(rimBlue);
+const rimLight = new THREE.DirectionalLight(0x2f7bff, 1.4);
+rimLight.position.set(-18, -6, -14);
+scene.add(rimLight);
 
-const rimCyan = new THREE.PointLight(0x4df0ff, 5, 90, 2);
-rimCyan.position.set(14, -30, 12);
-scene.add(rimCyan);
+// Warm light that travels with the camera focus, like the amber glow in the video.
+const amberLight = new THREE.PointLight(0xff9a2e, 45, 34, 2);
+scene.add(amberLight);
 
-/* ---- DNA group ---------------------------------------------------------
-   Everything belonging to the helix (strands, rungs, particles) lives in
-   one group so it can be rotated / nudged as a whole while individual
-   parts still animate independently.
--------------------------------------------------------------------------- */
+// Soft reflections for the metallic strands (loaded lazily).
+(async () => {
+  try {
+    const { RoomEnvironment } = await import('three/addons/environments/RoomEnvironment.js');
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+  } catch (e) { /* fine without it */ }
+})();
+
+/* ---- Helix groups ----
+   tiltGroup lays the helix diagonally; dnaGroup spins around the helix axis. */
+const tiltGroup = new THREE.Group();
+tiltGroup.rotation.z = CONFIG.helix.tilt;
+scene.add(tiltGroup);
 const dnaGroup = new THREE.Group();
-scene.add(dnaGroup);
+tiltGroup.add(dnaGroup);
+tiltGroup.updateMatrixWorld(true);
 
-const { turns, radius, totalHeight, strandTubeRadius } = CONFIG.helix;
+const { turns, radius, totalHeight, tube } = CONFIG.helix;
 const TOP_Y = totalHeight / 2;
 
-function helixPoint(t, phase) {
+function helixPoint(t, phase, out = new THREE.Vector3()) {
   const angle = t * turns * Math.PI * 2 + phase;
-  const y = TOP_Y - t * totalHeight;
-  return new THREE.Vector3(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+  return out.set(Math.cos(angle) * radius, TOP_Y - t * totalHeight, Math.sin(angle) * radius);
 }
 
-// ---- Strands (smooth tubes through sampled helix points) ----
+/* ---- Cyan "data" texture used as the strands' emissive map ---- */
+function makeDataTexture() {
+  const w = 1024, h = 128;
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, w, h);
+  // Only draw on one side of the tube so the light reads as a stripe.
+  for (let i = 0; i < 90; i++) {
+    const y = 8 + Math.floor(Math.random() * 7) * 6;
+    const x = Math.random() * w;
+    const len = 6 + Math.random() * (Math.random() < 0.2 ? 140 : 40);
+    const a = 0.35 + Math.random() * 0.65;
+    ctx.fillStyle = `rgba(70,220,255,${a})`;
+    ctx.fillRect(x, y, len, 2 + Math.random() * 3);
+  }
+  for (let i = 0; i < 40; i++) {
+    ctx.fillStyle = 'rgba(140,240,255,0.9)';
+    ctx.fillRect(Math.random() * w, 10 + Math.random() * 40, 3, 3);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(turns * 2, 1);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+const dataTexture = makeDataTexture();
+
+/* ---- Strands ---- */
 function buildStrand(phase, color) {
-  const sampleCount = CONFIG.isMobile ? 220 : 420;
+  const samples = CONFIG.isMobile ? 360 : 700;
   const pts = [];
-  for (let i = 0; i <= sampleCount; i++) pts.push(helixPoint(i / sampleCount, phase));
+  for (let i = 0; i <= samples; i++) pts.push(helixPoint(i / samples, phase));
   const curve = new THREE.CatmullRomCurve3(pts);
-  const geo = new THREE.TubeGeometry(curve, sampleCount, strandTubeRadius, 8, false);
-  const mat = new THREE.MeshPhysicalMaterial({
+  const geo = new THREE.TubeGeometry(curve, samples, tube, 14, false);
+  const mat = new THREE.MeshStandardMaterial({
     color,
-    metalness: 0.15,
-    roughness: 0.25,
-    transmission: 0.35,
-    thickness: 1.2,
-    transparent: true,
-    opacity: 0.92,
-    emissive: color,
-    emissiveIntensity: 0.12,
+    metalness: 0.7,
+    roughness: 0.3,
+    envMapIntensity: 0.45,
+    emissive: 0xffffff,
+    emissiveMap: dataTexture,
+    emissiveIntensity: 1.3,
   });
   const mesh = new THREE.Mesh(geo, mat);
   dnaGroup.add(mesh);
   return mesh;
 }
+const strandA = buildStrand(0, 0x1a3360);
+const strandB = buildStrand(Math.PI, 0x152b52);
 
-const strandA = buildStrand(0, 0xf4f6f8);
-const strandB = buildStrand(Math.PI, 0xb9c2c9);
-
-// ---- Base-pair rungs (instanced cylinders) ----
-const RUNG_COUNT = CONFIG.isMobile ? 70 : 150;
-const rungGeo = new THREE.CylinderGeometry(0.055, 0.055, 1, 6, 1, true);
+/* ---- Rungs (instanced rods) ---- */
+const RUNG_COUNT = CONFIG.isMobile ? 130 : 220;
+const rungGeo = new THREE.CylinderGeometry(0.13, 0.13, 1, 10, 1, true);
 const rungMat = new THREE.MeshStandardMaterial({
-  color: 0xaebccb,
-  emissive: 0x2a3d55,
-  emissiveIntensity: 0.4,
-  roughness: 0.4,
-  metalness: 0.1,
-  transparent: true,
-  opacity: 0.85,
-  vertexColors: true,
+  color: 0x1f3a66, metalness: 0.6, roughness: 0.35, envMapIntensity: 0.8,
+  emissive: 0x0a2a55, emissiveIntensity: 0.5,
 });
 const rungMesh = new THREE.InstancedMesh(rungGeo, rungMat, RUNG_COUNT);
-rungMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(RUNG_COUNT * 3), 3);
 
-const rungT = new Float32Array(RUNG_COUNT);
-const baseColor = new THREE.Color(0xaebccb);
-const dummyObj = new THREE.Object3D();
+/* ---- Glowing rings: two per rung + bands along the strands ---- */
+const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false });
+const rungRingGeo = new THREE.TorusGeometry(0.24, 0.065, 8, 22);
+const strandRingGeo = new THREE.TorusGeometry(tube + 0.08, 0.06, 8, 28);
+
+const RUNG_RINGS = RUNG_COUNT * 2;
+const STRAND_RINGS_PER = CONFIG.isMobile ? 60 : 80;
+const STRAND_RINGS = STRAND_RINGS_PER * 2;
+
+const rungRingMesh = new THREE.InstancedMesh(rungRingGeo, ringMat, RUNG_RINGS);
+const strandRingMesh = new THREE.InstancedMesh(strandRingGeo, ringMat, STRAND_RINGS);
+const rungRingT = new Float32Array(RUNG_RINGS);
+const strandRingT = new Float32Array(STRAND_RINGS);
+
+const AMBER = new THREE.Color().setRGB(1.15, 0.5, 0.1);
+const dummy = new THREE.Object3D();
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
+const Z_AXIS = new THREE.Vector3(0, 0, 1);
+const pA = new THREE.Vector3(), pB = new THREE.Vector3(), dir = new THREE.Vector3();
 
 for (let i = 0; i < RUNG_COUNT; i++) {
-  const t = 0.015 + (i / (RUNG_COUNT - 1)) * 0.97;
-  rungT[i] = t;
-  const pA = helixPoint(t, 0);
-  const pB = helixPoint(t, Math.PI);
-  const mid = pA.clone().lerp(pB, 0.5);
-  const dir = pB.clone().sub(pA);
+  const t = 0.01 + (i / (RUNG_COUNT - 1)) * 0.98;
+  helixPoint(t, 0, pA);
+  helixPoint(t, Math.PI, pB);
+  dir.copy(pB).sub(pA);
   const len = dir.length();
-  const quat = new THREE.Quaternion().setFromUnitVectors(Y_AXIS, dir.normalize());
+  dir.normalize();
 
-  dummyObj.position.copy(mid);
-  dummyObj.quaternion.copy(quat);
-  dummyObj.scale.set(1, len, 1);
-  dummyObj.updateMatrix();
-  rungMesh.setMatrixAt(i, dummyObj.matrix);
-  rungMesh.setColorAt(i, baseColor);
+  dummy.position.copy(pA).lerp(pB, 0.5);
+  dummy.quaternion.setFromUnitVectors(Y_AXIS, dir);
+  dummy.scale.set(1, len, 1);
+  dummy.updateMatrix();
+  rungMesh.setMatrixAt(i, dummy.matrix);
+
+  [0.2, 0.8].forEach((f, j) => {
+    const idx = i * 2 + j;
+    dummy.position.copy(pA).lerp(pB, f);
+    dummy.quaternion.setFromUnitVectors(Z_AXIS, dir);
+    dummy.scale.set(1, 1, 1);
+    dummy.updateMatrix();
+    rungRingMesh.setMatrixAt(idx, dummy.matrix);
+    rungRingMesh.setColorAt(idx, AMBER);
+    rungRingT[idx] = t;
+  });
 }
-rungMesh.instanceMatrix.needsUpdate = true;
-rungMesh.instanceColor.needsUpdate = true;
-dnaGroup.add(rungMesh);
 
-// ---- Ambient particles drifting around the helix ----
-const PARTICLE_COUNT = CONFIG.isMobile ? 300 : 850;
+for (let s = 0; s < 2; s++) {
+  const phase = s === 0 ? 0 : Math.PI;
+  for (let i = 0; i < STRAND_RINGS_PER; i++) {
+    const idx = s * STRAND_RINGS_PER + i;
+    // slightly irregular spacing so it feels hand-placed
+    const t = 0.01 + ((i + 0.5 + (Math.sin(i * 12.9898) * 0.3)) / STRAND_RINGS_PER) * 0.98;
+    helixPoint(t, phase, pA);
+    helixPoint(t + 0.0005, phase, pB);
+    dir.copy(pB).sub(pA).normalize();
+    dummy.position.copy(pA);
+    dummy.quaternion.setFromUnitVectors(Z_AXIS, dir);
+    dummy.scale.set(1, 1, 1);
+    dummy.updateMatrix();
+    strandRingMesh.setMatrixAt(idx, dummy.matrix);
+    strandRingMesh.setColorAt(idx, AMBER);
+    strandRingT[idx] = t;
+  }
+}
+[rungMesh, rungRingMesh, strandRingMesh].forEach((m) => {
+  m.instanceMatrix.needsUpdate = true;
+  if (m.instanceColor) m.instanceColor.needsUpdate = true;
+  dnaGroup.add(m);
+});
+
+/* ---- Floating dust particles ---- */
+const PARTICLE_COUNT = CONFIG.isMobile ? 260 : 700;
 const particleGeo = new THREE.BufferGeometry();
 const particlePos = new Float32Array(PARTICLE_COUNT * 3);
-const particlePhase = new Float32Array(PARTICLE_COUNT);
-const particleSpeed = new Float32Array(PARTICLE_COUNT);
-const particleBaseY = new Float32Array(PARTICLE_COUNT);
-const particleAngle = new Float32Array(PARTICLE_COUNT);
-const particleRadius = new Float32Array(PARTICLE_COUNT);
-
+const pPhase = new Float32Array(PARTICLE_COUNT);
+const pSpeed = new Float32Array(PARTICLE_COUNT);
+const pBaseY = new Float32Array(PARTICLE_COUNT);
+const pAngle = new Float32Array(PARTICLE_COUNT);
+const pRadius = new Float32Array(PARTICLE_COUNT);
 for (let i = 0; i < PARTICLE_COUNT; i++) {
-  const r = radius * (1.1 + Math.random() * 1.8);
-  const angle = Math.random() * Math.PI * 2;
-  const y = TOP_Y - Math.random() * totalHeight;
-  particleAngle[i] = angle;
-  particleRadius[i] = r;
-  particleBaseY[i] = y;
-  particlePhase[i] = Math.random() * Math.PI * 2;
-  particleSpeed[i] = 0.15 + Math.random() * 0.3;
-  particlePos[i * 3] = Math.cos(angle) * r;
-  particlePos[i * 3 + 1] = y;
-  particlePos[i * 3 + 2] = Math.sin(angle) * r;
+  pAngle[i] = Math.random() * Math.PI * 2;
+  pRadius[i] = radius * (1.3 + Math.random() * 2.4);
+  pBaseY[i] = TOP_Y - Math.random() * totalHeight;
+  pPhase[i] = Math.random() * Math.PI * 2;
+  pSpeed[i] = 0.15 + Math.random() * 0.3;
 }
 particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
 
@@ -281,86 +351,128 @@ function createGlowTexture() {
   const ctx = c.getContext('2d');
   const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
   g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.4, 'rgba(160,210,255,0.6)');
-  g.addColorStop(1, 'rgba(160,210,255,0)');
+  g.addColorStop(0.35, 'rgba(150,200,255,0.5)');
+  g.addColorStop(1, 'rgba(150,200,255,0)');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
-  const tex = new THREE.CanvasTexture(c);
-  return tex;
+  return new THREE.CanvasTexture(c);
 }
-const glowTexture = createGlowTexture();
-
-const particleMat = new THREE.PointsMaterial({
-  size: CONFIG.isMobile ? 0.55 : 0.7,
-  map: glowTexture,
+const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({
+  size: CONFIG.isMobile ? 0.45 : 0.55,
+  map: createGlowTexture(),
   transparent: true,
-  opacity: 0.55,
+  opacity: 0.4,
   depthWrite: false,
   blending: THREE.AdditiveBlending,
-  color: 0x9fc4ff,
-});
-const particles = new THREE.Points(particleGeo, particleMat);
+  color: 0x86b6ff,
+}));
 dnaGroup.add(particles);
 
-/* ---- Optional bloom post-processing (loaded lazily, degrades gracefully) */
+/* ---- Bloom (lazy, degrades gracefully) ---- */
 let composer = null;
-let bloomPass = null;
 (async () => {
-  if (CONFIG.isMobile) return; // keep mobile lean
+  if (CONFIG.isMobile) return;
   try {
-    const [{ EffectComposer }, { RenderPass }, { UnrealBloomPass }] = await Promise.all([
+    const [{ EffectComposer }, { RenderPass }, { UnrealBloomPass }, { OutputPass }] = await Promise.all([
       import('three/addons/postprocessing/EffectComposer.js'),
       import('three/addons/postprocessing/RenderPass.js'),
       import('three/addons/postprocessing/UnrealBloomPass.js'),
+      import('three/addons/postprocessing/OutputPass.js'),
     ]);
-    composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    bloomPass = new UnrealBloomPass(
-      new THREE.Vector2(window.innerWidth, window.innerHeight),
-      0.55, 0.6, 0.82
-    );
-    composer.addPass(bloomPass);
+    const c = new EffectComposer(renderer);
+    c.addPass(new RenderPass(scene, camera));
+    c.addPass(new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.75, 0.5, 0.45));
+    c.addPass(new OutputPass());
+    composer = c;
   } catch (err) {
-    composer = null; // fall back to plain rendering
+    composer = null;
   }
 })();
 
 /* --------------------------------------------------------------------------
-   3. SCROLL STATE, CAMERA TRAVEL & MOUSE PARALLAX
+   3. SCROLL, CAMERA PATH & MOUSE
    -------------------------------------------------------------------------- */
 gsap.registerPlugin(ScrollTrigger);
 
 const scrollState = { target: 0, current: 0 };
 const mouseState = { x: 0, y: 0, smoothX: 0, smoothY: 0 };
-let introDone = false;
+const intro = { p: CONFIG.reducedMotion ? 1 : 0 };
 
 window.addEventListener('mousemove', (e) => {
   mouseState.x = (e.clientX / window.innerWidth) * 2 - 1;
   mouseState.y = (e.clientY / window.innerHeight) * 2 - 1;
 }, { passive: true });
 
-// Master scroll tracker — drives the camera's journey through the helix.
 ScrollTrigger.create({
   trigger: document.body,
   start: 'top top',
   end: () => document.body.scrollHeight - window.innerHeight,
-  scrub: 0.8,
   onUpdate: (self) => { scrollState.target = self.progress; },
 });
 
-const CAM_START_Y = TOP_Y - 4;
-const CAM_END_Y = TOP_Y - totalHeight + 14;
-const CAM_START_Z = CONFIG.reducedMotion ? 26 : 13;
-const CAM_END_Z = 30;
+const CAM_T0 = 0.05;
+const CAM_T1 = 0.95;
+const axisDir = new THREE.Vector3(0, -1, 0).applyAxisAngle(Z_AXIS, CONFIG.helix.tilt).normalize();
+const WORLD_UP = new THREE.Vector3(0, 1, 0);
 
-camera.position.set(0, CAM_START_Y, CAM_START_Z);
-camera.lookAt(0, CAM_START_Y - 3, 0);
+function axisPoint(t, out) {
+  return out.set(0, TOP_Y - t * totalHeight, 0).applyMatrix4(tiltGroup.matrixWorld);
+}
+
+const camTarget = new THREE.Vector3();
+const camOffset = new THREE.Vector3();
+const lookPoint = new THREE.Vector3();
+const fwd = new THREE.Vector3(), rightV = new THREE.Vector3(), upV = new THREE.Vector3();
+
+function updateCamera(progress) {
+  const t = THREE.MathUtils.lerp(CAM_T0, CAM_T1, progress);
+  axisPoint(t, camTarget);
+
+  const motion = CONFIG.reducedMotion ? 0.3 : 1;
+  const base = CONFIG.isMobile ? 27 : 34;
+  // Cinematic push-in / pull-out as you travel.
+  let dist = base * (0.9 + 0.12 * Math.sin(progress * Math.PI * 7) * motion);
+  dist *= THREE.MathUtils.lerp(0.16, 1, intro.p);
+
+  // Orbit around the helix axis for changing angles, plus mouse parallax.
+  const orbit = (0.55 * Math.sin(progress * Math.PI * 3.3) + mouseState.smoothX * 0.14) * motion;
+  camOffset.set(0, 0, dist).applyAxisAngle(axisDir, orbit);
+  // Sit a little "behind" the focus point so we look along the strand.
+  camOffset.addScaledVector(axisDir, -dist * 0.22);
+  camOffset.addScaledVector(WORLD_UP, mouseState.smoothY * -1.2 * motion);
+
+  camera.position.copy(camTarget).add(camOffset);
+
+  // Shift the look point so the helix sits beside the text (left on desktop, top on mobile).
+  fwd.copy(camOffset).negate().normalize();
+  rightV.crossVectors(fwd, WORLD_UP).normalize();
+  upV.crossVectors(rightV, fwd).normalize();
+  lookPoint.copy(camTarget);
+  const shiftAmount = intro.p;
+  if (CONFIG.isMobile) lookPoint.addScaledVector(upV, -dist * 0.2 * shiftAmount);
+  else lookPoint.addScaledVector(rightV, dist * 0.3 * shiftAmount);
+  camera.up.copy(WORLD_UP);
+  camera.lookAt(lookPoint);
+
+  amberLight.position.copy(camTarget).addScaledVector(upV, 3).addScaledVector(fwd, -3);
+  return t;
+}
 
 /* --------------------------------------------------------------------------
-   4. PROJECT GLOW + PANEL SCROLL TRIGGERS
+   4. PROJECT PANELS & RING GLOW
    -------------------------------------------------------------------------- */
-const glowState = { index: -1, strength: 0, targetStrength: 0, color: new THREE.Color(0xffffff) };
-const tmpColor = new THREE.Color();
+const glowState = { index: -1, strength: 0, targetStrength: 0, color: new THREE.Color(), depth: 0.5 };
+const projectSections = document.querySelectorAll('.project-section');
+const projectDepths = [];
+
+function computeProjectDepths() {
+  const max = document.body.scrollHeight - window.innerHeight;
+  projectSections.forEach((s, i) => {
+    const mid = s.offsetTop + s.offsetHeight / 2 - window.innerHeight / 2;
+    const p = THREE.MathUtils.clamp(mid / Math.max(max, 1), 0, 1);
+    projectDepths[i] = THREE.MathUtils.lerp(CAM_T0, CAM_T1, p);
+  });
+}
 
 function setActiveProject(index, active) {
   const marker = document.querySelector(`.nav-marker[data-index="${index}"]`);
@@ -368,19 +480,16 @@ function setActiveProject(index, active) {
   if (active) {
     glowState.index = index;
     glowState.targetStrength = 1;
-    glowState.color.setHex(CONFIG.projects[index].color);
+    glowState.color.setRGB(...CONFIG.projects[index].glow);
   } else if (glowState.index === index) {
     glowState.targetStrength = 0;
   }
 }
 
-const navIndicator = document.getElementById('nav-indicator');
-const projectSections = document.querySelectorAll('.project-section, .featured-section');
-
 projectSections.forEach((section) => {
   const idx = Number(section.dataset.projectIndex);
   const panel = section.querySelector('[data-panel]');
-
+  const copy = panel.querySelector('.project-copy');
   gsap.timeline({
     scrollTrigger: {
       trigger: section,
@@ -393,63 +502,58 @@ projectSections.forEach((section) => {
       onLeaveBack: () => setActiveProject(idx, false),
     },
   })
-    .fromTo(panel,
-      { opacity: 0, scale: 0.82, y: 70, rotateX: 10 },
-      { opacity: 1, scale: 1, y: 0, rotateX: 0, duration: 0.4, ease: 'power3.out' })
-    .to(panel, { opacity: 1, scale: 1, duration: 0.35 })
-    .to(panel, { opacity: 0, scale: 0.88, y: -70, rotateX: -10, duration: 0.4, ease: 'power3.out' });
+    .fromTo(panel, { opacity: 0 }, { opacity: 1, duration: 0.3 })
+    .fromTo(copy, { y: 60, filter: 'blur(6px)' }, { y: 0, filter: 'blur(0px)', duration: 0.3, ease: 'power3.out' }, 0)
+    .to(panel, { opacity: 1, duration: 0.35 })
+    .to(panel, { opacity: 0, duration: 0.3 })
+    .to(copy, { y: -60, filter: 'blur(6px)', duration: 0.3, ease: 'power3.in' }, '<');
 });
 
-// Show the nav indicator only while travelling through the project zone.
+// Fade-in for the glass sections
+gsap.utils.toArray('.about-card, .section-head, .timeline-item, .edu-card, .skills-grid, .contact-content').forEach((el) => {
+  gsap.from(el, {
+    opacity: 0, y: 40, duration: 1, ease: 'power3.out',
+    scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none reverse' },
+  });
+});
+
+const navIndicator = document.getElementById('nav-indicator');
 ScrollTrigger.create({
   trigger: '#project-0',
   start: 'top 80%',
-  end: '#contact',
-  onEnter: () => navIndicator.classList.add('visible'),
-  onEnterBack: () => navIndicator.classList.add('visible'),
-  onLeave: () => navIndicator.classList.remove('visible'),
-  onLeaveBack: () => navIndicator.classList.remove('visible'),
+  endTrigger: '#project-4',
+  end: 'bottom 20%',
+  onToggle: (self) => navIndicator.classList.toggle('visible', self.isActive),
 });
 
-// Scroll progress rail on the left edge.
 const scrollFill = document.getElementById('scroll-progress-fill');
 ScrollTrigger.create({
   trigger: document.body,
   start: 'top top',
   end: () => document.body.scrollHeight - window.innerHeight,
-  scrub: true,
   onUpdate: (self) => { scrollFill.style.height = (self.progress * 100) + '%'; },
 });
 
-/* --------------------------------------------------------------------------
-   5. ABOUT SECTION — DNA slows & the strands read as two vertical lines
-   -------------------------------------------------------------------------- */
+/* ---- About slows the helix; contact makes one amber particle follow the cursor ---- */
+let dnaSpeed = 1;
+let dnaTargetSpeed = 1;
 ScrollTrigger.create({
   trigger: '#about',
   start: 'top 70%',
-  end: 'bottom top',
-  onEnter: () => { dnaTargetSpeed = 0.05; },
-  onLeaveBack: () => { dnaTargetSpeed = 1; },
-  onLeave: () => { dnaTargetSpeed = 0.02; },
-  onEnterBack: () => { dnaTargetSpeed = 0.05; },
+  onEnter: () => { dnaTargetSpeed = 0.25; document.body.classList.add('dim-scene'); },
+  onLeaveBack: () => { dnaTargetSpeed = 1; document.body.classList.remove('dim-scene'); },
 });
 
-/* --------------------------------------------------------------------------
-   6. CONTACT — DNA dissolves, one particle follows the cursor
-   -------------------------------------------------------------------------- */
 const contactParticle = document.getElementById('contact-particle');
 let inContact = false;
 const contactX = gsap.quickTo(contactParticle, 'x', { duration: 0.5, ease: 'power3.out' });
 const contactY = gsap.quickTo(contactParticle, 'y', { duration: 0.5, ease: 'power3.out' });
-
 ScrollTrigger.create({
   trigger: '#contact',
   start: 'top 60%',
-  end: 'bottom bottom',
-  onEnter: () => { inContact = true; gsap.to(contactParticle, { opacity: 1, duration: 0.6 }); },
+  onEnter: () => { inContact = true; if (!CONFIG.isTouch) gsap.to(contactParticle, { opacity: 1, duration: 0.6 }); },
   onLeaveBack: () => { inContact = false; gsap.to(contactParticle, { opacity: 0, duration: 0.4 }); },
 });
-
 window.addEventListener('mousemove', (e) => {
   if (!inContact) return;
   contactX(e.clientX);
@@ -457,22 +561,54 @@ window.addEventListener('mousemove', (e) => {
 }, { passive: true });
 
 /* --------------------------------------------------------------------------
-   7. SKILLS — technologies rendered as glowing DNA nodes
+   5. SKILLS
    -------------------------------------------------------------------------- */
-const skillsHelix = document.getElementById('skills-helix');
+const skillsGrid = document.getElementById('skills-grid');
 CONFIG.skills.forEach((label) => {
-  const node = document.createElement('div');
-  node.className = 'skill-node';
-  node.setAttribute('role', 'listitem');
-  node.tabIndex = 0;
-  node.innerHTML = `<span class="node-dot"></span><span class="node-bar"></span><span class="node-label">${label}</span>`;
-  node.addEventListener('click', () => node.classList.toggle('active'));
-  skillsHelix.appendChild(node);
+  const chip = document.createElement('div');
+  chip.className = 'skill-chip glass';
+  chip.setAttribute('role', 'listitem');
+  chip.tabIndex = 0;
+  chip.innerHTML = `<span class="chip-ring"></span><span>${label}</span>`;
+  chip.addEventListener('click', () => chip.classList.toggle('active'));
+  chip.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); chip.classList.toggle('active'); } });
+  skillsGrid.appendChild(chip);
 });
 
 /* --------------------------------------------------------------------------
-   8. CUSTOM CURSOR
+   6. MENU & IN-PAGE LINKS
    -------------------------------------------------------------------------- */
+const menuBtn = document.getElementById('menu-btn');
+const menuOverlay = document.getElementById('menu-overlay');
+
+function setMenu(open) {
+  document.body.classList.toggle('menu-open', open);
+  menuBtn.textContent = open ? 'close' : 'menu';
+  menuBtn.setAttribute('aria-expanded', String(open));
+  menuOverlay.setAttribute('aria-hidden', String(!open));
+}
+menuBtn.addEventListener('click', () => setMenu(!document.body.classList.contains('menu-open')));
+window.addEventListener('keydown', (e) => { if (e.key === 'Escape') setMenu(false); });
+
+document.querySelectorAll('a[data-scroll]').forEach((a) => {
+  a.addEventListener('click', (e) => {
+    const el = document.querySelector(a.getAttribute('href'));
+    if (!el) return;
+    e.preventDefault();
+    setMenu(false);
+    // Land a little inside project sections so the panel is fully visible.
+    const extra = el.classList.contains('project-section') ? el.offsetHeight * 0.3 : 0;
+    window.scrollTo({ top: el.offsetTop + extra, behavior: CONFIG.reducedMotion ? 'auto' : 'smooth' });
+  });
+});
+
+/* --------------------------------------------------------------------------
+   7. CUSTOM CURSOR + RAYCAST
+   -------------------------------------------------------------------------- */
+const raycaster = new THREE.Raycaster();
+const pointerNDC = new THREE.Vector2(-2, -2);
+let raycastAccum = 0;
+
 if (!CONFIG.isTouch) {
   const cursorDot = document.getElementById('cursor-dot');
   const cursorRing = document.getElementById('cursor-ring');
@@ -484,140 +620,103 @@ if (!CONFIG.isTouch) {
   window.addEventListener('mousemove', (e) => {
     dotX(e.clientX); dotY(e.clientY);
     ringX(e.clientX); ringY(e.clientY);
+    pointerNDC.x = (e.clientX / window.innerWidth) * 2 - 1;
+    pointerNDC.y = -(e.clientY / window.innerHeight) * 2 + 1;
   }, { passive: true });
 
-  document.querySelectorAll('.project-link, .skill-node, .contact-link, [data-panel]').forEach((el) => {
+  document.querySelectorAll('a, button, .skill-chip').forEach((el) => {
     el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover-project'));
     el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover-project'));
   });
 }
 
 /* --------------------------------------------------------------------------
-   9. RAYCAST — hovering directly over the DNA swells the cursor dot
-   -------------------------------------------------------------------------- */
-const raycaster = new THREE.Raycaster();
-const pointerNDC = new THREE.Vector2();
-let raycastAccum = 0;
-
-if (!CONFIG.isTouch) {
-  window.addEventListener('mousemove', (e) => {
-    pointerNDC.x = (e.clientX / window.innerWidth) * 2 - 1;
-    pointerNDC.y = -(e.clientY / window.innerHeight) * 2 + 1;
-  }, { passive: true });
-}
-
-/* --------------------------------------------------------------------------
-   10. INTRO ANIMATION — camera pulls back from an extreme close-up
+   8. INTRO — camera pulls back from an extreme close-up
    -------------------------------------------------------------------------- */
 function playIntro() {
-  const heroContent = document.querySelector('.hero-content');
-  gsap.set(heroContent, { opacity: 0, y: 30 });
+  const heroBits = document.querySelectorAll('.hero-content > *, .hero-cta, .scroll-hint');
+  gsap.set(heroBits, { opacity: 0, y: 24 });
+
+  const unlock = () => { document.body.style.overflow = ''; ScrollTrigger.refresh(); };
 
   if (CONFIG.reducedMotion) {
-    camera.position.set(0, CAM_START_Y, CAM_END_Z);
-    gsap.to(heroContent, { opacity: 1, y: 0, duration: 0.8 });
-    document.body.style.overflow = '';
-    introDone = true;
+    intro.p = 1;
+    gsap.to(heroBits, { opacity: 1, y: 0, duration: 0.6 });
+    unlock();
     return;
   }
-
-  camera.position.set(0, CAM_START_Y, 4.2);
-  const camProxy = { z: 4.2 };
-  gsap.timeline({
-    onComplete: () => {
-      document.body.style.overflow = '';
-      introDone = true;
-    },
-  })
-    .to(camProxy, {
-      z: CAM_END_Z,
-      duration: 2.6,
-      ease: 'power4.out',
-      onUpdate: () => { camera.position.z = camProxy.z; },
-    }, 0)
-    .to(heroContent, { opacity: 1, y: 0, duration: 1.4, ease: 'power3.out' }, 0.9);
+  gsap.timeline({ onComplete: unlock })
+    .to(intro, { p: 1, duration: 3, ease: 'power3.inOut' }, 0)
+    .to(heroBits, { opacity: 1, y: 0, duration: 1.1, stagger: 0.12, ease: 'power3.out' }, 1.6);
 }
 
 /* --------------------------------------------------------------------------
-   11. RENDER LOOP
+   9. RENDER LOOP
    -------------------------------------------------------------------------- */
 const clock = new THREE.Clock();
-let dnaSpeed = 1;
-let dnaTargetSpeed = 1;
+const tmpColor = new THREE.Color();
 let rafId = null;
 
-function updateRungHighlight() {
-  glowState.strength += (glowState.targetStrength - glowState.strength) * 0.08;
-  if (glowState.strength < 0.003 && glowState.targetStrength === 0) return;
+function updateRings(elapsed, camT) {
+  glowState.strength += (glowState.targetStrength - glowState.strength) * 0.06;
+  const hasGlow = glowState.index >= 0 && glowState.strength > 0.003;
+  const centerT = hasGlow ? (projectDepths[glowState.index] ?? camT) : 0;
+  const spread = 0.06;
 
-  const activeProject = CONFIG.projects[glowState.index];
-  if (!activeProject) return;
-  const centerT = activeProject.depth;
-  const spread = 0.05;
-
-  for (let i = 0; i < RUNG_COUNT; i++) {
-    const d = Math.abs(rungT[i] - centerT);
-    if (d > spread * 2.2) continue;
-    const local = Math.max(0, 1 - d / (spread * 2.2)) * glowState.strength;
-    tmpColor.copy(baseColor).lerp(glowState.color, local);
-    rungMesh.setColorAt(i, tmpColor);
-  }
-  rungMesh.instanceColor.needsUpdate = true;
+  const paint = (mesh, tArr) => {
+    for (let i = 0; i < tArr.length; i++) {
+      const t = tArr[i];
+      // a soft pulse of light travelling down the strand
+      const pulse = Math.pow(Math.max(0, Math.sin(t * 90 - elapsed * 1.6)), 16) * 0.9;
+      tmpColor.copy(AMBER).multiplyScalar(1 + pulse);
+      if (hasGlow) {
+        const d = Math.abs(t - centerT);
+        if (d < spread) {
+          const k = (1 - d / spread) * glowState.strength;
+          tmpColor.lerp(glowState.color, k);
+        }
+      }
+      mesh.setColorAt(i, tmpColor);
+    }
+    mesh.instanceColor.needsUpdate = true;
+  };
+  paint(rungRingMesh, rungRingT);
+  paint(strandRingMesh, strandRingT);
 }
 
 function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const elapsed = clock.elapsedTime;
 
-  // Smooth (inertial) scroll progress toward the ScrollTrigger target.
-  scrollState.current += (scrollState.target - scrollState.current) * (CONFIG.reducedMotion ? 0.18 : 0.09);
+  scrollState.current += (scrollState.target - scrollState.current) * (CONFIG.reducedMotion ? 0.2 : 0.07);
+  mouseState.smoothX += (mouseState.x - mouseState.smoothX) * 0.05;
+  mouseState.smoothY += (mouseState.y - mouseState.smoothY) * 0.05;
 
-  // Smoothed mouse parallax.
-  mouseState.smoothX += (mouseState.x - mouseState.smoothX) * 0.06;
-  mouseState.smoothY += (mouseState.y - mouseState.smoothY) * 0.06;
-
-  // Continuous independent DNA motion (never a static background).
+  // Slow spin around the helix axis — never a static background.
   dnaSpeed += (dnaTargetSpeed - dnaSpeed) * 0.03;
-  const rotAmount = CONFIG.reducedMotion ? 0.04 : 0.14;
-  dnaGroup.rotation.y += dt * rotAmount * dnaSpeed;
-  dnaGroup.position.x = Math.sin(elapsed * 0.12) * 0.4;
-  strandA.material.emissiveIntensity = 0.1 + Math.sin(elapsed * 0.8) * 0.04;
-  strandB.material.emissiveIntensity = 0.1 + Math.cos(elapsed * 0.7) * 0.04;
+  dnaGroup.rotation.y += dt * (CONFIG.reducedMotion ? 0.03 : 0.12) * dnaSpeed;
+  dataTexture.offset.x -= dt * 0.02 * dnaSpeed;
 
-  // Particle drift.
+  // Particle drift
   const pos = particleGeo.attributes.position;
   for (let i = 0; i < PARTICLE_COUNT; i++) {
-    const wobble = Math.sin(elapsed * particleSpeed[i] + particlePhase[i]) * 0.6;
-    const a = particleAngle[i] + elapsed * 0.02 * particleSpeed[i];
-    pos.array[i * 3] = Math.cos(a) * particleRadius[i] + wobble * 0.3;
-    pos.array[i * 3 + 1] = particleBaseY[i] + wobble;
-    pos.array[i * 3 + 2] = Math.sin(a) * particleRadius[i];
+    const wob = Math.sin(elapsed * pSpeed[i] + pPhase[i]) * 0.6;
+    const a = pAngle[i] + elapsed * 0.02 * pSpeed[i];
+    pos.array[i * 3] = Math.cos(a) * pRadius[i] + wob * 0.3;
+    pos.array[i * 3 + 1] = pBaseY[i] + wob;
+    pos.array[i * 3 + 2] = Math.sin(a) * pRadius[i];
   }
   pos.needsUpdate = true;
 
-  updateRungHighlight();
+  const camT = updateCamera(scrollState.current);
+  updateRings(elapsed, camT);
 
-  if (introDone) {
-    // Camera travels vertically through the helix as the page scrolls.
-    const camY = THREE.MathUtils.lerp(CAM_START_Y, CAM_END_Y, scrollState.current);
-    const parallax = CONFIG.reducedMotion ? 0.6 : 2.4;
-    const targetX = mouseState.smoothX * parallax;
-    const targetZLift = mouseState.smoothY * (CONFIG.reducedMotion ? 0.3 : 1.6);
-
-    camera.position.y = camY;
-    camera.position.x += (targetX - camera.position.x) * 0.05;
-    camera.position.z = THREE.MathUtils.lerp(CAM_END_Z, CAM_END_Z + 4, Math.abs(mouseState.smoothX)) + targetZLift * 0.2;
-
-    camera.lookAt(mouseState.smoothX * 1.2, camY - 4.5, 0);
-  }
-
-  // Lightweight raycast for the "hovering the DNA" cursor state.
   if (!CONFIG.isTouch) {
     raycastAccum += dt;
-    if (raycastAccum > 0.08) {
+    if (raycastAccum > 0.1) {
       raycastAccum = 0;
       raycaster.setFromCamera(pointerNDC, camera);
-      const hit = raycaster.intersectObjects([strandA, strandB, rungMesh], false);
+      const hit = raycaster.intersectObjects([strandA, strandB], false);
       document.body.classList.toggle('cursor-hover-dna', hit.length > 0);
     }
   }
@@ -629,21 +728,15 @@ function animate() {
 }
 
 function startLoop() {
-  if (rafId === null) {
-    clock.getDelta(); // discard the gap accumulated while paused
-    rafId = requestAnimationFrame(animate);
-  }
+  if (rafId === null) { clock.getDelta(); rafId = requestAnimationFrame(animate); }
 }
 function stopLoop() {
   if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
 }
-
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden) stopLoop(); else startLoop();
-});
+document.addEventListener('visibilitychange', () => { if (document.hidden) stopLoop(); else startLoop(); });
 
 /* --------------------------------------------------------------------------
-   12. RESIZE
+   10. RESIZE
    -------------------------------------------------------------------------- */
 function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
@@ -654,25 +747,22 @@ function onResize() {
   ScrollTrigger.refresh();
 }
 window.addEventListener('resize', onResize);
+ScrollTrigger.addEventListener('refresh', computeProjectDepths);
+computeProjectDepths();
 
 /* --------------------------------------------------------------------------
-   13. BOOT SEQUENCE
+   11. BOOT
    -------------------------------------------------------------------------- */
-setLoaderProgress(22, 0.5);
-
-// Fonts + a beat of polish before revealing the scene.
+setLoaderProgress(24, 0.5);
 Promise.all([
   document.fonts ? document.fonts.ready : Promise.resolve(),
-  new Promise((res) => setTimeout(res, 400)),
+  new Promise((res) => setTimeout(res, 450)),
 ]).then(() => {
-  setLoaderProgress(60, 0.6);
+  setLoaderProgress(64, 0.6);
   return new Promise((res) => setTimeout(res, 500));
 }).then(() => {
-  setLoaderProgress(92, 0.5);
-  return new Promise((res) => setTimeout(res, 380));
-}).then(() => {
-  setLoaderProgress(100, 0.4);
-  setTimeout(hideLoader, 480);
+  setLoaderProgress(100, 0.5);
+  setTimeout(hideLoader, 600);
 });
 
 startLoop();
