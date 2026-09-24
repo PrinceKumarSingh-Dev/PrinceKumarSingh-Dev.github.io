@@ -15,6 +15,7 @@ const CONFIG = {
   reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   isTouch: window.matchMedia('(hover: none)').matches,
   isMobile: window.innerWidth < 860,
+  bloom: false,          // glow bloom only suits dark backgrounds
 
   helix: {
     turns: 22,
@@ -26,11 +27,11 @@ const CONFIG = {
 
   // Glow colour used on the rings while a project is on screen.
   projects: [
-    { name: 'Purpl IBS',    glow: [2.4, 1.35, 0.35] },
-    { name: 'MyCityA2Z',    glow: [0.35, 1.9, 2.6] },
-    { name: 'Service Book', glow: [2.4, 1.35, 0.35] },
-    { name: 'CCPL PM',      glow: [0.35, 1.9, 2.6] },
-    { name: 'Drakey',       glow: [2.8, 1.6, 0.45] },
+    { name: 'Purpl IBS',    glow: [1, 1, 1] },
+    { name: 'MyCityA2Z',    glow: [0.42, 0.04, 0.0] },
+    { name: 'Service Book', glow: [1, 1, 1] },
+    { name: 'CCPL PM',      glow: [0.42, 0.04, 0.0] },
+    { name: 'Drakey',       glow: [1, 1, 1] },
   ],
 
   skills: [
@@ -93,7 +94,7 @@ function drawLoader() {
     p.y += (ty - p.y) * p.speed;
     loaderCtx.beginPath();
     loaderCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    loaderCtx.fillStyle = p.amber ? 'rgba(255,171,61,0.85)' : 'rgba(120,190,255,0.55)';
+    loaderCtx.fillStyle = p.amber ? 'rgba(232,97,0,0.9)' : 'rgba(255,153,51,0.55)';
     loaderCtx.fill();
   });
   requestAnimationFrame(drawLoader);
@@ -125,7 +126,7 @@ document.body.style.overflow = 'hidden'; // lock scroll until the intro is done
 
 const canvas = document.getElementById('webgl');
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x071631, 0.02);
+scene.fog = new THREE.FogExp2(0xfff8ef, 0.014);
 
 // Deep-navy gradient background (drawn by the renderer, so bloom sees it too).
 function makeBackground() {
@@ -142,30 +143,31 @@ function makeBackground() {
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
-scene.background = makeBackground();
+// Background is the page's CSS gradient (transparent canvas).
 
 const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 400);
 
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+renderer.setClearColor(0x000000, 0);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CONFIG.isMobile ? 1.5 : 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
+renderer.toneMappingExposure = 1.0;
 
 /* ---- Lighting ---- */
-scene.add(new THREE.HemisphereLight(0x6f9cff, 0x050a18, 0.9));
+scene.add(new THREE.HemisphereLight(0xffffff, 0xffd9b0, 1.3));
 
-const keyLight = new THREE.DirectionalLight(0xbfd6ff, 1.6);
+const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
 keyLight.position.set(10, 22, 16);
 scene.add(keyLight);
 
-const rimLight = new THREE.DirectionalLight(0x2f7bff, 1.4);
+const rimLight = new THREE.DirectionalLight(0xffb366, 1.2);
 rimLight.position.set(-18, -6, -14);
 scene.add(rimLight);
 
 // Warm light that travels with the camera focus, like the amber glow in the video.
-const amberLight = new THREE.PointLight(0xff9a2e, 45, 34, 2);
+const amberLight = new THREE.PointLight(0xffb060, 25, 34, 2);
 scene.add(amberLight);
 
 // Soft reflections for the metallic strands (loaded lazily).
@@ -208,11 +210,11 @@ function makeDataTexture() {
     const x = Math.random() * w;
     const len = 6 + Math.random() * (Math.random() < 0.2 ? 140 : 40);
     const a = 0.35 + Math.random() * 0.65;
-    ctx.fillStyle = `rgba(70,220,255,${a})`;
+    ctx.fillStyle = `rgba(255,255,255,${a})`;
     ctx.fillRect(x, y, len, 2 + Math.random() * 3);
   }
   for (let i = 0; i < 40; i++) {
-    ctx.fillStyle = 'rgba(140,240,255,0.9)';
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
     ctx.fillRect(Math.random() * w, 10 + Math.random() * 40, 3, 3);
   }
   const tex = new THREE.CanvasTexture(c);
@@ -233,26 +235,26 @@ function buildStrand(phase, color) {
   const geo = new THREE.TubeGeometry(curve, samples, tube, 14, false);
   const mat = new THREE.MeshStandardMaterial({
     color,
-    metalness: 0.7,
-    roughness: 0.3,
-    envMapIntensity: 0.45,
+    metalness: 0.25,
+    roughness: 0.32,
+    envMapIntensity: 0.8,
     emissive: 0xffffff,
     emissiveMap: dataTexture,
-    emissiveIntensity: 1.3,
+    emissiveIntensity: 0.55,
   });
   const mesh = new THREE.Mesh(geo, mat);
   dnaGroup.add(mesh);
   return mesh;
 }
-const strandA = buildStrand(0, 0x1a3360);
-const strandB = buildStrand(Math.PI, 0x152b52);
+const strandA = buildStrand(0, 0xff9933);
+const strandB = buildStrand(Math.PI, 0xf57c00);
 
 /* ---- Rungs (instanced rods) ---- */
 const RUNG_COUNT = CONFIG.isMobile ? 130 : 220;
 const rungGeo = new THREE.CylinderGeometry(0.13, 0.13, 1, 10, 1, true);
 const rungMat = new THREE.MeshStandardMaterial({
-  color: 0x1f3a66, metalness: 0.6, roughness: 0.35, envMapIntensity: 0.8,
-  emissive: 0x0a2a55, emissiveIntensity: 0.5,
+  color: 0xfff1e0, metalness: 0.1, roughness: 0.45, envMapIntensity: 0.9,
+  emissive: 0x000000, emissiveIntensity: 0,
 });
 const rungMesh = new THREE.InstancedMesh(rungGeo, rungMat, RUNG_COUNT);
 
@@ -270,7 +272,7 @@ const strandRingMesh = new THREE.InstancedMesh(strandRingGeo, ringMat, STRAND_RI
 const rungRingT = new Float32Array(RUNG_RINGS);
 const strandRingT = new Float32Array(STRAND_RINGS);
 
-const AMBER = new THREE.Color().setRGB(1.15, 0.5, 0.1);
+const AMBER = new THREE.Color().setRGB(0.72, 0.08, 0.0); // deep saffron
 const dummy = new THREE.Object3D();
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 const Z_AXIS = new THREE.Vector3(0, 0, 1);
@@ -351,8 +353,8 @@ function createGlowTexture() {
   const ctx = c.getContext('2d');
   const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
   g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.35, 'rgba(150,200,255,0.5)');
-  g.addColorStop(1, 'rgba(150,200,255,0)');
+  g.addColorStop(0.35, 'rgba(255,255,255,0.5)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, size, size);
   return new THREE.CanvasTexture(c);
@@ -361,17 +363,17 @@ const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({
   size: CONFIG.isMobile ? 0.45 : 0.55,
   map: createGlowTexture(),
   transparent: true,
-  opacity: 0.4,
+  opacity: 0.55,
   depthWrite: false,
-  blending: THREE.AdditiveBlending,
-  color: 0x86b6ff,
+  blending: THREE.NormalBlending,
+  color: 0xff9933,
 }));
 dnaGroup.add(particles);
 
 /* ---- Bloom (lazy, degrades gracefully) ---- */
 let composer = null;
 (async () => {
-  if (CONFIG.isMobile) return;
+  if (CONFIG.isMobile || !CONFIG.bloom) return;
   try {
     const [{ EffectComposer }, { RenderPass }, { UnrealBloomPass }, { OutputPass }] = await Promise.all([
       import('three/addons/postprocessing/EffectComposer.js'),
@@ -655,6 +657,7 @@ function playIntro() {
    -------------------------------------------------------------------------- */
 const clock = new THREE.Clock();
 const tmpColor = new THREE.Color();
+const WHITE = new THREE.Color(1, 1, 1);
 let rafId = null;
 
 function updateRings(elapsed, camT) {
@@ -668,7 +671,7 @@ function updateRings(elapsed, camT) {
       const t = tArr[i];
       // a soft pulse of light travelling down the strand
       const pulse = Math.pow(Math.max(0, Math.sin(t * 90 - elapsed * 1.6)), 16) * 0.9;
-      tmpColor.copy(AMBER).multiplyScalar(1 + pulse);
+      tmpColor.copy(AMBER).lerp(WHITE, Math.min(pulse, 0.85));
       if (hasGlow) {
         const d = Math.abs(t - centerT);
         if (d < spread) {
